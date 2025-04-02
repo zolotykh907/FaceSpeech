@@ -36,6 +36,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var results: FaceLandmarkerResult? = null
     private var linePaint = Paint()
     private var pointPaint = Paint()
+    private var circlePaint = Paint()
 
     private var scaleFactor: Float = 1f
     private var imageWidth: Int = 1
@@ -62,6 +63,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         pointPaint.color = Color.YELLOW
         pointPaint.strokeWidth = LANDMARK_STROKE_WIDTH
         pointPaint.style = Paint.Style.FILL
+
+        circlePaint.color = Color.RED
+        circlePaint.strokeWidth = LANDMARK_STROKE_WIDTH
+        circlePaint.style = Paint.Style.STROKE
     }
 
     override fun draw(canvas: Canvas) {
@@ -97,20 +102,52 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     /**
      * Draws all landmarks for a single face on the canvas.
      */
+//    private fun drawFaceLandmarks(
+//        canvas: Canvas,
+//        faceLandmarks: List<NormalizedLandmark>,
+//        offsetX: Float,
+//        offsetY: Float
+//    ) {
+//        val points_for_draw = setOf(13, 14, 61, 291)
+//        faceLandmarks.forEachIndexed {id, landmark ->
+//            if (id in points_for_draw) {
+//                val x = landmark.x() * imageWidth * scaleFactor + offsetX
+//                val y = landmark.y() * imageHeight * scaleFactor + offsetY
+//                //Log.d("Точка №$id: ($x, $y)")
+//                canvas.drawPoint(x, y, pointPaint)
+//            }
+//        }
+//    }
+
     private fun drawFaceLandmarks(
         canvas: Canvas,
         faceLandmarks: List<NormalizedLandmark>,
         offsetX: Float,
         offsetY: Float
     ) {
-        val points_for_draw = setOf(13, 14, 61, 291)
-        faceLandmarks.forEachIndexed {id, landmark ->
-            if (id in points_for_draw) {
+        val pointsForDraw = setOf(13, 14, 61, 291)
+        val selectedLandmarks = mutableListOf<Pair<Float, Float>>()
+
+        // Собираем координаты выбранных точек
+        faceLandmarks.forEachIndexed { id, landmark ->
+            if (id in pointsForDraw) {
                 val x = landmark.x() * imageWidth * scaleFactor + offsetX
                 val y = landmark.y() * imageHeight * scaleFactor + offsetY
-                //Log.d("Hand", "Точка №$id: ($x, $y)")
-                canvas.drawPoint(x, y, pointPaint)
+                selectedLandmarks.add(Pair(x, y))
+                canvas.drawPoint(x, y, pointPaint) // Рисуем точки для наглядности
             }
+        }
+
+        // Если собраны все 4 точки, рисуем эллипс
+        if (selectedLandmarks.size == 4) {
+            // Находим минимальные и максимальные координаты
+            val minX = selectedLandmarks.minOf { it.first }
+            val maxX = selectedLandmarks.maxOf { it.first }
+            val minY = selectedLandmarks.minOf { it.second }
+            val maxY = selectedLandmarks.maxOf { it.second }
+
+            // Рисуем эллипс, который охватывает все точки
+            canvas.drawOval(minX, minY, maxX, maxY, circlePaint)
         }
     }
 
