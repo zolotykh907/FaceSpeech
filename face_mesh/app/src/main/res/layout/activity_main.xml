@@ -43,12 +43,24 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_alignParentTop="true"
-            android:background="@color/toolbar_background">
+            android:background="#B0E0E6">
 
             <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/baseline_mood_24"
+                android:layout_gravity="center"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"/>
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/media_pipe_banner" />
+                android:text="FaceSpeech"
+                android:textColor="#4682B4"
+                android:textSize="40sp"
+                android:layout_gravity="center"
+                android:textStyle="bold"/>
         </androidx.appcompat.widget.Toolbar>
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
