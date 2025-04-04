@@ -5,11 +5,13 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
+import com.google.mediapipe.examples.facelandmarker.fragment.Exercise
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -22,13 +24,14 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     private var pointPaint = Paint() // Для точек губ
     private var maskPaint = Paint()  // Для эталонного круга
     private var textPaint = Paint()  // Для текста
-    private var overlayPaint = Paint()
+    private var overlayPaint = Paint() // Для эффекта
 
 
     private var scaleFactor: Float = 1f
     private var imageWidth: Int = 1
     private var imageHeight: Int = 1
     private var allIsCorrect: Boolean = false
+    private var currentExercise = Exercise.SMILE
 
     init {
         initPaints()
@@ -103,7 +106,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         // Центр круга — среднее положение губ
         val centerX = (leftCorner.x() + rightCorner.x()) / 2 * imageWidth * scaleFactor + offsetX
         val centerY = (upCorner.y() + downCorner.y()) / 2 * imageHeight * scaleFactor + offsetY
-        val radius = 60f // Фиксированный радиус, как в Python-коде
+        val radius = 60f
 
         canvas.drawCircle(centerX, centerY, radius, maskPaint)
     }
@@ -166,6 +169,12 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             RunningMode.IMAGE, RunningMode.VIDEO -> min(width * 1f / imageWidth, height * 1f / imageHeight)
             RunningMode.LIVE_STREAM -> max(width * 1f / imageWidth, height * 1f / imageHeight)
         }
+        invalidate()
+    }
+
+    fun setExercise(exercise: Exercise) {
+        currentExercise = exercise
+        Log.d("OverlayView", "Current exercise set to: $currentExercise")
         invalidate()
     }
 

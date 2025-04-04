@@ -49,4 +49,11 @@
         <item>CPU</item>
         <item>GPU</item>
     </string-array>
+
+    <!-- Новый массив для упражнений -->
+    <string-array name="exercise_spinner_titles">
+        <item>Circle</item>
+        <item>Smile</item>
+    </string-array>
+
 </resources>
