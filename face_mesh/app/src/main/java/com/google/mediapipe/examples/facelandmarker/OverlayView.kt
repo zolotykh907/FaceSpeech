@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import android.graphics.Bitmap
 import androidx.core.content.ContextCompat
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.vision.core.RunningMode
@@ -20,18 +21,21 @@ import kotlin.math.sqrt
 class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
     private var results: FaceLandmarkerResult? = null
+    private var yoloResults: List<YoloHelper.YoloResult>? = null
     private var linePaint = Paint()  // Для текущего контура губ
     private var pointPaint = Paint() // Для точек губ
     private var maskPaint = Paint()  // Для эталонного круга
     private var textPaint = Paint()  // Для текста
     private var overlayPaint = Paint() // Для эффекта
 
-
     private var scaleFactor: Float = 1f
     private var imageWidth: Int = 1
     private var imageHeight: Int = 1
     private var allIsCorrect: Boolean = false
     private var currentExercise = Exercise.SMILE
+
+    private var lineYoloPaint = Paint()
+    private var textYoloPaint = Paint()
 
     init {
         initPaints()
@@ -43,6 +47,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         pointPaint.reset()
         maskPaint.reset()
         textPaint.reset()
+        yoloResults = null
+        lineYoloPaint.reset()
+        textYoloPaint.reset()
         invalidate()
         initPaints()
     }
@@ -51,6 +58,10 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         linePaint.color = ContextCompat.getColor(context!!, R.color.mp_color_primary)
         linePaint.strokeWidth = LANDMARK_STROKE_WIDTH
         linePaint.style = Paint.Style.STROKE
+
+        lineYoloPaint.color = Color.RED
+        lineYoloPaint.strokeWidth = LANDMARK_STROKE_WIDTH
+        lineYoloPaint.style = Paint.Style.STROKE
 
         pointPaint.strokeWidth = LANDMARK_STROKE_WIDTH
         pointPaint.style = Paint.Style.FILL
@@ -89,6 +100,23 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                 drawFaceLandmarks(canvas, faceLandmarks, offsetX, offsetY)
             }
         }
+
+        // Отрисовка YOLO
+        val scaledImageWidth = imageWidth * scaleFactor
+        val scaledImageHeight = imageHeight * scaleFactor
+        val offsetX = (width - scaledImageWidth) / 2f
+        val offsetY = (height - scaledImageHeight) / 2f
+
+        yoloResults?.forEach { result ->
+            val xMin = result.xMin * imageWidth * scaleFactor + offsetX
+            val yMin = result.yMin * imageHeight * scaleFactor + offsetY
+            val xMax = result.xMax * imageWidth * scaleFactor + offsetX
+            val yMax = result.yMax * imageHeight * scaleFactor + offsetY
+            canvas.drawRect(xMin, yMin, xMax, yMax, linePaint)
+            //canvas.drawText("Conf: ${String.format("%.2f", result.confidence)}", xMin, yMin - 10f, textPaint)
+            Log.d("OverlayView", "Drawing YOLO box: [$xMin, $yMin, $xMax, $yMax], conf=${result.confidence}")
+        }
+
     }
 
     // Отрисовка эталонного круга
@@ -160,6 +188,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         imageHeight: Int,
         imageWidth: Int,
         runningMode: RunningMode = RunningMode.IMAGE
+
     ) {
         results = faceLandmarkerResults
         this.imageHeight = imageHeight
@@ -172,6 +201,14 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         invalidate()
     }
 
+    fun setYoloResults(yoloResults: List<YoloHelper.YoloResult>, imageHeight: Int, imageWidth: Int) {
+        this.yoloResults = yoloResults
+        this.imageHeight = imageHeight
+        this.imageWidth = imageWidth
+        scaleFactor = min(width * 1f / imageWidth, height * 1f / imageHeight)
+        invalidate()
+    }
+
     fun setExercise(exercise: Exercise) {
         currentExercise = exercise
         Log.d("OverlayView", "Current exercise set to: $currentExercise")
@@ -181,4 +218,5 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     companion object {
         private const val LANDMARK_STROKE_WIDTH = 8F
     }
+
 }

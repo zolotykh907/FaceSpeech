@@ -24,7 +24,6 @@ import com.google.mediapipe.examples.facelandmarker.databinding.ActivityMainBind
 
 class MainActivity : AppCompatActivity() {
     private lateinit var activityMainBinding: ActivityMainBinding
-    private val viewModel : MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

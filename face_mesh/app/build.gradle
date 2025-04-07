@@ -48,6 +48,11 @@ android {
     }
     buildFeatures {
         viewBinding true
+        //mlModelBinding true
+    }
+
+    aaptOptions {
+        noCompress "tflite"  // Запрещает сжатие .tflite-файлов
     }
 }
 
@@ -65,6 +70,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.fragment:fragment-ktx:1.5.4'
+    implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.3.0'
 
     // Navigation library
     def nav_version = "2.5.3"
@@ -96,4 +103,10 @@ dependencies {
 
     // MediaPipe Library
     implementation 'com.google.mediapipe:tasks-vision:0.10.14'
+
+    // Tensorflow Lite Library
+    implementation 'org.tensorflow:tensorflow-lite:2.13.0' // или вашу версию
+    implementation 'org.tensorflow:tensorflow-lite-support:0.4.3' // для Model Binding
+    implementation 'org.tensorflow:tensorflow-lite-task-vision:0.4.3'
+
 }

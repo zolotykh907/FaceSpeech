@@ -144,7 +144,7 @@ class FaceLandmarkerHelper(
     }
 
     // Convert the ImageProxy to MP Image and feed it to FacelandmakerHelper.
-    fun detectLiveStream(
+    /*fun detectLiveStream(
         imageProxy: ImageProxy,
         isFrontCamera: Boolean
     ) {
@@ -197,6 +197,31 @@ class FaceLandmarkerHelper(
         faceLandmarker?.detectAsync(mpImage, frameTime)
         // As we're using running mode LIVE_STREAM, the landmark result will
         // be returned in returnLivestreamResult function
+    }*/
+    fun detectLiveStream(bitmap: Bitmap, frameTime: Long, isFrontCamera: Boolean) {
+        if (runningMode != RunningMode.LIVE_STREAM) {
+            throw IllegalArgumentException("Attempting to call detectLiveStream while not using RunningMode.LIVE_STREAM")
+        }
+        Log.d("popa", "Starting detectLiveStream with bitmap: ${bitmap.width}x${bitmap.height}")
+        try {
+            val mpImage = BitmapImageBuilder(bitmap).build()
+            Log.d("popa", "MPImage created")
+            detectAsync(mpImage, frameTime)
+            Log.d("popa", "detectAsync called")
+        } catch (e: Exception) {
+            Log.e("popa", "Error in detectLiveStream: ${e.message}", e)
+            throw e
+        }
+    }
+
+    @VisibleForTesting
+    fun detectAsync(mpImage: MPImage, frameTime: Long) {
+        Log.d("popa", "Calling faceLandmarker.detectAsync")
+        faceLandmarker?.detectAsync(mpImage, frameTime) ?: run {
+            Log.w("popa", "FaceLandmarker is null")
+            faceLandmarkerHelperListener?.onError("FaceLandmarker not initialized")
+        }
+        Log.d("popa", "faceLandmarker.detectAsync completed")
     }
 
     // Accepts the URI for a video file loaded from the user's gallery and attempts to run
