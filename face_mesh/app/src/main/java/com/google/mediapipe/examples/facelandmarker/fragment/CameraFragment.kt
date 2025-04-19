@@ -137,7 +137,7 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
                 override fun onError(error: String) {
                     Log.e("YoloHelper", error)
                 }
-                override fun onResults(resultBundle: YoloHelper.YoloResultBundle) {
+                override fun onYoloResults(resultBundle: YoloHelper.YoloResultBundle) {
                     activity?.runOnUiThread {
                         if (_fragmentCameraBinding != null) {
                             fragmentCameraBinding.overlay.setYoloResults(
@@ -321,7 +321,7 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
     private fun detectFace(imageProxy: ImageProxy) {
             try {
                 val bitmap = imageProxyToBitmap(imageProxy)
-                Log.d(TAG, "Bitmap created: ${bitmap.width}x${bitmap.height}")
+                Log.d("Bti", "Bitmap created: ${bitmap.width}x${bitmap.height}")
                 if (this::faceLandmarkerHelper.isInitialized) {
                     Log.d(TAG, "Calling FaceLandmarkerHelper.detectLiveStream")
                     faceLandmarkerHelper.detectLiveStream(
@@ -333,7 +333,10 @@ class CameraFragment : Fragment(), FaceLandmarkerHelper.LandmarkerListener {
                 } else {
                     Log.w(TAG, "FaceLandmarkerHelper not initialized yet")
                 }
-                yoloHelper.runInference(bitmap) // Закомментировано
+                    //yoloHelper.runInference(bitmap)
+                backgroundExecutor.execute {
+                    yoloHelper.runInference(bitmap)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Error in detectFace: ${e.message}", e)
             }

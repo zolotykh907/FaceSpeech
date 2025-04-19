@@ -25,7 +25,7 @@ class YoloHelper(
 
     fun setupYoloModel() {
         try {
-            val tfliteModel = loadModelFile(context, "best_float32.tflite")
+            val tfliteModel = loadModelFile(context, "best_float16.tflite")
             interpreter = Interpreter(tfliteModel)
             Log.d(TAG, "YOLO model successfully initialized")
         } catch (e: Exception) {
@@ -61,7 +61,7 @@ class YoloHelper(
     }
 
     fun runInference(bitmap: Bitmap): List<YoloHelper.YoloResult> {
-        Log.d(TAG, "Starting YOLO inference with bitmap: ${bitmap.width}x${bitmap.height}")
+        Log.d("YoloBitmap", "Starting YOLO inference with bitmap: ${bitmap.width}x${bitmap.height}")
         val startTime = SystemClock.uptimeMillis()
         val input = preprocessBitmap(bitmap)
         Log.d(TAG, "Input buffer prepared, capacity: ${input.capacity()}")
@@ -75,7 +75,7 @@ class YoloHelper(
         val results = processYoloOutput(output)
         val inferenceTime = SystemClock.uptimeMillis() - startTime
         Log.d("TONGUE", "YOLO found ${results.size} objects in ${inferenceTime}ms")
-        yoloListener?.onResults(YoloHelper.YoloResultBundle(results, inferenceTime, bitmap.height, bitmap.width))
+        yoloListener?.onYoloResults(YoloHelper.YoloResultBundle(results, inferenceTime, bitmap.height, bitmap.width))
         return results
     }
 
@@ -126,7 +126,7 @@ class YoloHelper(
 
     interface YoloListener {
         fun onError(error: String)
-        fun onResults(resultBundle: YoloResultBundle)
+        fun onYoloResults(resultBundle: YoloResultBundle)
     }
 
     companion object {
